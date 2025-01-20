@@ -8,7 +8,9 @@ start(_Type, _Args) ->
     io:format("0~n"),
 
     Dispatch = cowboy_router:compile([
-        {'_', [{"/", hello_handler, []}]}
+        {'_', [{"/", cowboy_static, {priv_file, how_erlang, "static/how_erl.html"}},
+               {"/assets/[...]", cowboy_static, {priv_dir, how_erlang, "static"}},
+               {"/video_urls", video_urls, []}]}
     ]),
 
     io:format("1~n"),

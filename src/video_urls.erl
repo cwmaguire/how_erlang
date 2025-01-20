@@ -1,4 +1,4 @@
--module(hello_handler).
+-module(video_urls).
 
 -export([init/2]).
 -export([content_types_provided/2]).
@@ -16,5 +16,7 @@ content_types_provided(Req, State) ->
     {Handlers, Req, State}.
 
 to_json(Req, State) ->
-  Body = <<"{\"text\": \"hi!\"}">>,
-  {Body, Req, State}.
+  Priv = code:priv_dir(how_erlang),
+  Filename = Priv ++ "/urls.json",
+  {ok, JSON} = file:read_file(Filename),
+  {JSON, Req, State}.
