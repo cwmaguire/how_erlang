@@ -1,0 +1,16 @@
+{application, how_erlang,
+ [{description, "Web server for Erlang HOW-TO Videos"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {how_erlang_app, []}},
+  {applications,
+   [cowboy,
+    kernel,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.
