@@ -5,8 +5,6 @@
 -export([start/2, stop/1]).
 
 start(_Type, _Args) ->
-    io:format("0~n"),
-
     Dispatch = cowboy_router:compile([
         {'_', [{"/", cowboy_static, {priv_file, how_erlang, "static/how_erl.html"}},
                {"/assets/[...]", cowboy_static, {priv_dir, how_erlang, "static"}},

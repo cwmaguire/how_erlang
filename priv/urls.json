@@ -1,1 +1,2 @@
-[{"name":"blue"}, {"name": "red"}]
+[{"name": "blue", "top": 100, "left": 100, "w": 50, "h": 70},
+ {"name": "red", "top": 110, "left": 200, "w": 70, "h": 50}]
