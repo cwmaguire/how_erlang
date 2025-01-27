@@ -1,4 +1,4 @@
-console.log("hi!");
+var urls;
 
 async function getData() {
   const url = "http://main:8080/video_urls";
@@ -13,6 +13,16 @@ async function getData() {
   } catch (error) {
     console.error(error.message);
   }
+}
+
+function postData(urlData) {
+  console.log(urlData);
+  const url = "http://main:8080/video_urls";
+  fetch(url, {
+    method: "POST",
+    body: JSON.stringify(urlData),
+    headers: { "Content-Type": "application/json" }
+  });
 }
 
 console.log("Getting JSON");
@@ -32,7 +42,8 @@ function create_url(url){
   add_drag_and_drop(urlDiv);
 }
 
-function render_url({name, top, left, w, h}){
+function render_url(urlData){
+  const {name, desc, url, top, left, w, h} = urlData;
   const div = document.createElement("div");
   div.style.position = "fixed";
   div.style.border = "1px solid black";
@@ -40,7 +51,9 @@ function render_url({name, top, left, w, h}){
   div.style.left = left + 'px';
   div.style.width = w + 'px';
   div.style.height = h + 'px';
-  div.innerText = name;
+  div.innerHTML = `<a href='${url}'>${name}</a><br>${desc}`;
+  div.className = 'url-div';
+  div.urlData = urlData;
   document.body.appendChild(div);
   return div;
 }
@@ -70,7 +83,8 @@ function follow_mouse(elem){
     function() {
       elem.style.zIndex = 0;
       stop_following_mouse();
-    }
+      postData(query_url_data());
+    };
 }
 
 function stop_following_mouse(){
@@ -85,4 +99,12 @@ function move_to(elem, x, y) {
   const yCenter = (y - halfHeight);
   elem.style.left = xCenter + 'px';
   elem.style.top = yCenter + 'px';
+  elem.urlData.left = xCenter;
+  elem.urlData.top = yCenter;
+}
+
+function query_url_data(){
+  const notArray = document.querySelectorAll(".url-div");
+  const nodes = Array.from(notArray);
+  return nodes.map(({urlData}) => urlData);
 }
