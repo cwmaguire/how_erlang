@@ -85,7 +85,7 @@ function create_main_div(urlData){
                       post_url_data();
                     }];
 
-  div.moveHandlers = [move_to];
+  div.moveHandlers = [move_to, update_to];
 
   document.body.appendChild(div);
 
@@ -123,14 +123,23 @@ function stop_following_mouse(){
 }
 
 function move_to(elem, {pageX: x, pageY: y}) {
+  const {xCenter, yCenter} = center(elem, x, y);
+  elem.style.left = xCenter + 'px';
+  elem.style.top = yCenter + 'px';
+}
+
+function update_to(elem, {pageX: x, pageY: y}){
+  const {xCenter, yCenter} = center(elem, x, y);
+  elem.urlData.left = xCenter;
+  elem.urlData.top = yCenter;
+}
+
+function center(elem, x, y){
   const halfWidth = elem.offsetWidth / 2;
   const halfHeight = elem.offsetHeight / 2;
   const xCenter = (x - halfWidth);
   const yCenter = (y - halfHeight);
-  elem.style.left = xCenter + 'px';
-  elem.style.top = yCenter + 'px';
-  elem.urlData.left = xCenter;
-  elem.urlData.top = yCenter;
+  return {xCenter: xCenter, yCenter: yCenter};
 }
 
 function create_resize_corner_divs(urlData, parentDiv){
@@ -166,12 +175,15 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
   div.style.cursor = cursor;
   div.className = 'url-resize-div';
 
-  div.moveHandlers = [({pageX: x}) => console.log(x)];
+  div.parentDiv = parentDiv;
+  div.is_top = is_top;
+  div.is_left = is_left;
+  div.moveHandlers = [move_to, resize_parent];
   div.upHandlers = [];
 
   document.body.appendChild(div);
 
-  div.onmouse
+  div.onmousedown = () => follow_mouse(div);
 }
 
 function get_cursor(is_top, is_left){
@@ -181,6 +193,54 @@ function get_cursor(is_top, is_left){
     return 'nesw-resize';
   }
 }
+
+function resize_parent(elem, event){
+  const {parentDiv, is_top, is_left} = elem;
+  const {pageX: x, pageY: y} = event;
+
+  if(is_top && is_left){
+    resize_parent_top_left(elem, event);
+  }else if(is_top && !is_left){
+    resize_parent_top_right(elem, event);
+  }else if(!is_top && is_left){
+    resize_parent_bottom_left(elem, event);
+  }else if(!is_top && !is_left){
+    resize_parent_bottom_right(elem, event);
+  };
+}
+
+function resize_parent_top_left(elem, event){
+  const {parentDiv, is_top, is_left} = elem;
+  const {pageX: x, pageY: y} = event;
+
+  const {top: t0,
+         left: l0,
+         width: w0,
+         height: h0} = parentDiv.style;
+
+  const t = Number.parseInt(t0);
+  const l = Number.parseInt(l0);
+  const w = Number.parseInt(w0);
+  const h = Number.parseInt(h0);
+
+  const bottom = t + h;
+  const right = l + w;
+
+  const t2 = y + bottom;
+  const l2 = x + right;
+
+  const dx = x - l;
+  const dy = y - t;
+
+  parentDiv.style.height = h - dy;
+  parentDiv.style.width = w - dx;
+  parentDiv.style.top = y;
+  parentDiv.style.left = x;
+}
+
+function resize_parent_top_right(elem, event){ }
+function resize_parent_bottom_left(elem, event){ }
+function resize_parent_bottom_right(elem, event){ }
 
 function query_url_data(){
   const notArray = document.querySelectorAll(".url-div");
