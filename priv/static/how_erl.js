@@ -154,6 +154,8 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
   const top = y - halfSize;
   const left = x - halfSize;
 
+  const cursor = get_cursor(is_top, is_left);
+
   const div = document.createElement("div");
   div.style.position = "fixed";
   div.style.border = "1px dashed red";
@@ -161,6 +163,7 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
   div.style.left = left + 'px';
   div.style.width = (halfSize * 2) + 'px';
   div.style.height = (halfSize * 2) + 'px';
+  div.style.cursor = cursor;
   div.className = 'url-resize-div';
 
   div.moveHandlers = [({pageX: x}) => console.log(x)];
@@ -169,6 +172,14 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
   document.body.appendChild(div);
 
   div.onmouse
+}
+
+function get_cursor(is_top, is_left){
+  if((is_top && is_left) || (!is_top && !is_left)){
+    return 'nwse-resize';
+  } else {
+    return 'nesw-resize';
+  }
 }
 
 function query_url_data(){
