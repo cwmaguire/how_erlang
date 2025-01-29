@@ -123,15 +123,6 @@ function stop_following_mouse(){
     document.onmouseup = null;
 }
 
-function resize_move_to(elem, event){
-  const {parentDiv} = elem;
-  const {h, w} = calc_div_h_w(parentDiv, event);
-  const isParentTooSmall = is_too_small(h, w);
-  if(!isParentTooSmall){
-    move_to(elem, event);
-  }
-}
-
 function move_to(elem, {pageX: x, pageY: y}) {
   const {xCenter, yCenter} = center(elem, x, y);
   elem.style.left = xCenter + 'px';
@@ -211,7 +202,6 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
   div.parentDiv = parentDiv;
   div.is_top = is_top;
   div.is_left = is_left;
-  //div.moveHandlers = [resize_move_to, resize_parent];
   div.moveHandlers = [resize_parent];
   div.upHandlers = [];
 
@@ -250,7 +240,7 @@ function resize_parent(elem, event){
 function resize_parent_top_left(elem, event){
   const {parentDiv} = elem;
   const {pageX: x, pageY: y} = event;
-  const {h, w} = calc_div_h_w(parentDiv, event);
+  const {h, w} = calc_div_h_w_top_left(parentDiv, event);
   const isTooSmall = is_too_small(h, w);
 
   if(!isTooSmall){
@@ -265,7 +255,7 @@ function is_too_small(h, w){
   return h < MIN_URL_SIZE || w < MIN_URL_SIZE;
 }
 
-function calc_div_h_w(elem, event){
+function calc_div_h_w_top_left(elem, event){
   const {pageX: x, pageY: y} = event;
 
   const {top: t0,
@@ -284,15 +274,96 @@ function calc_div_h_w(elem, event){
   const dx = x - l;
   const dy = y - t;
 
-  const newHeight = h - dy;
-  const newWidth = w - dx;
+  const newHeight = t + h - y;
+  const newWidth = l + w - x;
 
   return {h: newHeight, w: newWidth};
 }
 
-function resize_parent_top_right(elem, event){ }
-function resize_parent_bottom_left(elem, event){ }
-function resize_parent_bottom_right(elem, event){ }
+function resize_parent_top_right(elem, event){
+  const {parentDiv} = elem;
+  const {pageX: x, pageY: y} = event;
+  const {h, w} = calc_div_h_w_top_right(parentDiv, event);
+  const isTooSmall = is_too_small(h, w);
+
+  if(!isTooSmall){
+    parentDiv.style.height = h + 'px';
+    parentDiv.style.width = w + 'px';
+    parentDiv.style.top = y + 'px';
+  }
+}
+
+function calc_div_h_w_top_right(elem, event){
+  const {pageX: x, pageY: y} = event;
+
+  const {top: t0,
+         left: l0,
+         height: h0} = elem.style;
+
+  const t = Number.parseInt(t0);
+  const l = Number.parseInt(l0);
+  const h = Number.parseInt(h0);
+
+  const w2 = x - l;
+  const h2 = t + h - y;
+
+  return {h: h2, w: w2};
+}
+
+function resize_parent_bottom_left(elem, event){
+  const {parentDiv} = elem;
+  const {pageX: x, pageY: y} = event;
+  const {h, w} = calc_div_h_w_bottom_left(parentDiv, event);
+  const isTooSmall = is_too_small(h, w);
+
+  if(!isTooSmall){
+    parentDiv.style.height = h + 'px';
+    parentDiv.style.width = w + 'px';
+    parentDiv.style.left = x + 'px';
+  }
+}
+
+function calc_div_h_w_bottom_left(elem, event){
+  const {pageX: x, pageY: y} = event;
+
+  const {top: t0,
+         left: l0,
+         width: w0} = elem.style;
+
+  const t = Number.parseInt(t0);
+  const l = Number.parseInt(l0);
+  const w = Number.parseInt(w0);
+
+  const w2 = l + w - x;
+  const h2 = y - t;
+
+  return {h: h2, w: w2};
+}
+
+function resize_parent_bottom_right(elem, event){
+  const {parentDiv} = elem;
+  const {pageX: x, pageY: y} = event;
+  const {h, w} = calc_div_h_w_bottom_right(parentDiv, event);
+  const isTooSmall = is_too_small(h, w);
+
+  if(!isTooSmall){
+    parentDiv.style.height = h + 'px';
+    parentDiv.style.width = w + 'px';
+  }
+}
+
+function calc_div_h_w_bottom_right(elem, event){
+  const {pageX: x, pageY: y} = event;
+  const {top: t0, left: l0} = elem.style;
+
+  const t = Number.parseInt(t0);
+  const l = Number.parseInt(l0);
+
+  const w2 = x - l;
+  const h2 = y - t;
+
+  return {h: h2, w: w2};
+}
 
 function query_url_data(){
   const notArray = document.querySelectorAll(".url-div");
