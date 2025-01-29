@@ -1,4 +1,5 @@
 var urls;
+const MIN_URL_SIZE = 100;
 
 document.ondblclick = create_new_url;
 
@@ -122,6 +123,15 @@ function stop_following_mouse(){
     document.onmouseup = null;
 }
 
+function resize_move_to(elem, event){
+  const {parentDiv} = elem;
+  const {h, w} = calc_div_h_w(parentDiv, event);
+  const isParentTooSmall = is_too_small(h, w);
+  if(!isParentTooSmall){
+    move_to(elem, event);
+  }
+}
+
 function move_to(elem, {pageX: x, pageY: y}) {
   const {xCenter, yCenter} = center(elem, x, y);
   elem.style.left = xCenter + 'px';
@@ -178,7 +188,7 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
   div.parentDiv = parentDiv;
   div.is_top = is_top;
   div.is_left = is_left;
-  div.moveHandlers = [move_to, resize_parent];
+  div.moveHandlers = [resize_move_to, resize_parent];
   div.upHandlers = [];
 
   document.body.appendChild(div);
@@ -210,13 +220,30 @@ function resize_parent(elem, event){
 }
 
 function resize_parent_top_left(elem, event){
-  const {parentDiv, is_top, is_left} = elem;
+  const {parentDiv} = elem;
+  const {pageX: x, pageY: y} = event;
+  const {h, w} = calc_div_h_w(parentDiv, event);
+  const isTooSmall = is_too_small(h, w);
+
+  if(!isTooSmall){
+    parentDiv.style.height = h + 'px';
+    parentDiv.style.width = w + 'px';
+    parentDiv.style.top = y + 'px';
+    parentDiv.style.left = x + 'px';
+  }
+}
+
+function is_too_small(h, w){
+  return h < MIN_URL_SIZE || w < MIN_URL_SIZE;
+}
+
+function calc_div_h_w(elem, event){
   const {pageX: x, pageY: y} = event;
 
   const {top: t0,
          left: l0,
          width: w0,
-         height: h0} = parentDiv.style;
+         height: h0} = elem.style;
 
   const t = Number.parseInt(t0);
   const l = Number.parseInt(l0);
@@ -226,16 +253,13 @@ function resize_parent_top_left(elem, event){
   const bottom = t + h;
   const right = l + w;
 
-  const t2 = y + bottom;
-  const l2 = x + right;
-
   const dx = x - l;
   const dy = y - t;
 
-  parentDiv.style.height = h - dy;
-  parentDiv.style.width = w - dx;
-  parentDiv.style.top = y;
-  parentDiv.style.left = x;
+  const newHeight = h - dy;
+  const newWidth = w - dx;
+
+  return {h: newHeight, w: newWidth};
 }
 
 function resize_parent_top_right(elem, event){ }
