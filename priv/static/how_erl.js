@@ -86,7 +86,7 @@ function create_main_div(urlData){
                       post_url_data();
                     }];
 
-  div.moveHandlers = [move_to, update_to];
+  div.moveHandlers = [move_to, move_resizers, update_to];
 
   document.body.appendChild(div);
 
@@ -138,6 +138,30 @@ function move_to(elem, {pageX: x, pageY: y}) {
   elem.style.top = yCenter + 'px';
 }
 
+function move_resizers(elem, event){
+  const {top, left, width, height} = elem.style;
+
+  const t = Number.parseInt(top);
+  const l = Number.parseInt(left);
+  const w = Number.parseInt(width);
+  const h = Number.parseInt(height);
+
+  const topLeft = {pageX: l, pageY: t};
+  const topRight = {pageX: l + w, pageY: t};
+  const bottomLeft = {pageX: l, pageY: t + h};
+  const bottomRight = {pageX: l + w, pageY: t + h};
+
+  const topLeftResizer = elem.topLeft;
+  const topRightResizer = elem.topRight;
+  const bottomLeftResizer = elem.bottomLeft;
+  const bottomRightResizer = elem.bottomRight;
+
+  move_to(topLeftResizer, topLeft);
+  move_to(topRightResizer, topRight);
+  move_to(bottomLeftResizer, bottomLeft);
+  move_to(bottomRightResizer, bottomRight);
+}
+
 function update_to(elem, {pageX: x, pageY: y}){
   const {xCenter, yCenter} = center(elem, x, y);
   elem.urlData.left = xCenter;
@@ -160,11 +184,10 @@ function create_resize_corner_divs(urlData, parentDiv){
   const bottomleft = {x: left, y: top + h, is_top: false, is_left: true};
   const bottomright = {x: left + w, y: top + h, is_top: false, is_left: false};
 
-  create_resize_corner_div(topleft, parentDiv);
-  create_resize_corner_div(topright, parentDiv);
-  create_resize_corner_div(bottomleft, parentDiv);
-  create_resize_corner_div(bottomright, parentDiv);
-
+  parentDiv.topLeft = create_resize_corner_div(topleft, parentDiv);
+  parentDiv.topRight = create_resize_corner_div(topright, parentDiv);
+  parentDiv.bottomLeft = create_resize_corner_div(bottomleft, parentDiv);
+  parentDiv.bottomRight = create_resize_corner_div(bottomright, parentDiv);
 }
 
 function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
@@ -188,12 +211,15 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
   div.parentDiv = parentDiv;
   div.is_top = is_top;
   div.is_left = is_left;
-  div.moveHandlers = [resize_move_to, resize_parent];
+  //div.moveHandlers = [resize_move_to, resize_parent];
+  div.moveHandlers = [resize_parent];
   div.upHandlers = [];
 
   document.body.appendChild(div);
 
   div.onmousedown = () => follow_mouse(div);
+
+  return div;
 }
 
 function get_cursor(is_top, is_left){
@@ -217,6 +243,8 @@ function resize_parent(elem, event){
   }else if(!is_top && !is_left){
     resize_parent_bottom_right(elem, event);
   };
+
+  move_resizers(parentDiv, event);
 }
 
 function resize_parent_top_left(elem, event){
