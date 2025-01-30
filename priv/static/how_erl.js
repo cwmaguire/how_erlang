@@ -83,7 +83,6 @@ function create_main_div(urlData){
 
   div.upHandlers = [function() {
                       div.style.zIndex = 0;
-                      post_url_data();
                     }];
 
   div.moveHandlers = [move_to, move_resizers, update_to];
@@ -106,8 +105,9 @@ function snap_to_mouse(elem, x, y){
 function follow_mouse(elem){
   float_above_everything(elem);
   const moveHandlers = elem.moveHandlers;
-  const upHandlers = elem.upHandlers;
+  const upHandlers = elem.upHandlers.slice();
   upHandlers.unshift(stop_following_mouse);
+  upHandlers.unshift(post_url_data);
   document.onmousemove = apply_event_handlers_fun(elem, moveHandlers);
   document.onmouseup = apply_event_handlers_fun(elem, upHandlers);
 }
@@ -235,7 +235,6 @@ function resize_parent(elem, event){
   };
 
   move_resizers(parentDiv, event);
-  post_url_data();
 }
 
 function resize_parent_({parentDiv}, event, dimsFun){
