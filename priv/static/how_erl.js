@@ -271,13 +271,12 @@ function is_too_small({h, w}){
   return h < MIN_URL_SIZE || w < MIN_URL_SIZE;
 }
 
-function dimensions(elem){
-  const {top: t0, left: l0, width: w0, height: h0} = elem.style;
-  const t = Number.parseInt(t0);
-  const l = Number.parseInt(l0);
-  const w = Number.parseInt(w0);
-  const h = Number.parseInt(h0);
-  return {t: t, l: l, w: w, h: h};
+function dimensions({style: {top: t, left: l, width: w, height: h}}){
+  return {t: i(t), l: i(l), w: i(w), h: i(h)};
+}
+
+function i(s){
+  return Number.parseInt(s);
 }
 
 function update(elem, {t, l, h, w}){
