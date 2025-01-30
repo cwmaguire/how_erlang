@@ -235,6 +235,7 @@ function resize_parent(elem, event){
   };
 
   move_resizers(parentDiv, event);
+  post_url_data();
 }
 
 function resize_parent_top_left(elem, event){
@@ -248,6 +249,11 @@ function resize_parent_top_left(elem, event){
     parentDiv.style.width = w + 'px';
     parentDiv.style.top = y + 'px';
     parentDiv.style.left = x + 'px';
+
+    parentDiv.urlData.left = x;
+    parentDiv.urlData.top = y;
+    parentDiv.urlData.h = h;
+    parentDiv.urlData.w = w;
   }
 }
 
@@ -290,6 +296,10 @@ function resize_parent_top_right(elem, event){
     parentDiv.style.height = h + 'px';
     parentDiv.style.width = w + 'px';
     parentDiv.style.top = y + 'px';
+
+    parentDiv.urlData.top = y;
+    parentDiv.urlData.h = h;
+    parentDiv.urlData.w = w;
   }
 }
 
@@ -320,6 +330,10 @@ function resize_parent_bottom_left(elem, event){
     parentDiv.style.height = h + 'px';
     parentDiv.style.width = w + 'px';
     parentDiv.style.left = x + 'px';
+
+    parentDiv.urlData.left = x;
+    parentDiv.urlData.h = h;
+    parentDiv.urlData.w = w;
   }
 }
 
@@ -349,6 +363,9 @@ function resize_parent_bottom_right(elem, event){
   if(!isTooSmall){
     parentDiv.style.height = h + 'px';
     parentDiv.style.width = w + 'px';
+
+    parentDiv.urlData.h = h;
+    parentDiv.urlData.w = w;
   }
 }
 
