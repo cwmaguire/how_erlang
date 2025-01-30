@@ -225,161 +225,71 @@ function resize_parent(elem, event){
   const {pageX: x, pageY: y} = event;
 
   if(is_top && is_left){
-    resize_parent_top_left(elem, event);
+    resize_parent_(elem, event, calc_div_h_w_top_left);
   }else if(is_top && !is_left){
-    resize_parent_top_right(elem, event);
+    resize_parent_(elem, event, calc_div_h_w_top_right);
   }else if(!is_top && is_left){
-    resize_parent_bottom_left(elem, event);
+    resize_parent_(elem, event, calc_div_h_w_bottom_left);
   }else if(!is_top && !is_left){
-    resize_parent_bottom_right(elem, event);
+    resize_parent_(elem, event, calc_div_h_w_bottom_right);
   };
 
   move_resizers(parentDiv, event);
   post_url_data();
 }
 
-function resize_parent_top_left(elem, event){
-  const {parentDiv} = elem;
+function resize_parent_({parentDiv}, event, dimsFun){
   const {pageX: x, pageY: y} = event;
-  const {h, w} = calc_div_h_w_top_left(parentDiv, event);
-  const isTooSmall = is_too_small(h, w);
+  const newDims = dimsFun(dimensions(parentDiv), {x: x, y: y});
 
-  if(!isTooSmall){
-    parentDiv.style.height = h + 'px';
-    parentDiv.style.width = w + 'px';
-    parentDiv.style.top = y + 'px';
-    parentDiv.style.left = x + 'px';
-
-    parentDiv.urlData.left = x;
-    parentDiv.urlData.top = y;
-    parentDiv.urlData.h = h;
-    parentDiv.urlData.w = w;
+  if(!is_too_small(newDims)){
+    update(parentDiv, newDims);
   }
 }
 
-function is_too_small(h, w){
+function calc_div_h_w_top_left({t, l, w, h}, {x, y}){
+  const bottom = t + h;
+  const right = l + w;
+  return {t: y, l: x, h: bottom - y, w: right - x};
+}
+
+function calc_div_h_w_top_right({t, l, w, h}, {x, y}){
+  const bottom = t + h;
+  return {t: y, l: l, h: bottom - y, w: x - l};
+}
+
+function calc_div_h_w_bottom_left({t, l, w, h}, {x, y}){
+  const right = l + w;
+  return {t: t, l: x, h: y - t, w: right - x};
+}
+
+function calc_div_h_w_bottom_right({t, l, w, h}, {x, y}){
+  return {t: t, l: l, h: y - t, w: x - l};
+}
+
+function is_too_small({h, w}){
   return h < MIN_URL_SIZE || w < MIN_URL_SIZE;
 }
 
-function calc_div_h_w_top_left(elem, event){
-  const {pageX: x, pageY: y} = event;
-
-  const {top: t0,
-         left: l0,
-         width: w0,
-         height: h0} = elem.style;
-
+function dimensions(elem){
+  const {top: t0, left: l0, width: w0, height: h0} = elem.style;
   const t = Number.parseInt(t0);
   const l = Number.parseInt(l0);
   const w = Number.parseInt(w0);
   const h = Number.parseInt(h0);
-
-  const bottom = t + h;
-  const right = l + w;
-
-  const dx = x - l;
-  const dy = y - t;
-
-  const newHeight = t + h - y;
-  const newWidth = l + w - x;
-
-  return {h: newHeight, w: newWidth};
+  return {t: t, l: l, w: w, h: h};
 }
 
-function resize_parent_top_right(elem, event){
-  const {parentDiv} = elem;
-  const {pageX: x, pageY: y} = event;
-  const {h, w} = calc_div_h_w_top_right(parentDiv, event);
-  const isTooSmall = is_too_small(h, w);
+function update(elem, {t, l, h, w}){
+    elem.style.height = h + 'px';
+    elem.style.width = w + 'px';
+    elem.style.top = t + 'px';
+    elem.style.left = l + 'px';
 
-  if(!isTooSmall){
-    parentDiv.style.height = h + 'px';
-    parentDiv.style.width = w + 'px';
-    parentDiv.style.top = y + 'px';
-
-    parentDiv.urlData.top = y;
-    parentDiv.urlData.h = h;
-    parentDiv.urlData.w = w;
-  }
-}
-
-function calc_div_h_w_top_right(elem, event){
-  const {pageX: x, pageY: y} = event;
-
-  const {top: t0,
-         left: l0,
-         height: h0} = elem.style;
-
-  const t = Number.parseInt(t0);
-  const l = Number.parseInt(l0);
-  const h = Number.parseInt(h0);
-
-  const w2 = x - l;
-  const h2 = t + h - y;
-
-  return {h: h2, w: w2};
-}
-
-function resize_parent_bottom_left(elem, event){
-  const {parentDiv} = elem;
-  const {pageX: x, pageY: y} = event;
-  const {h, w} = calc_div_h_w_bottom_left(parentDiv, event);
-  const isTooSmall = is_too_small(h, w);
-
-  if(!isTooSmall){
-    parentDiv.style.height = h + 'px';
-    parentDiv.style.width = w + 'px';
-    parentDiv.style.left = x + 'px';
-
-    parentDiv.urlData.left = x;
-    parentDiv.urlData.h = h;
-    parentDiv.urlData.w = w;
-  }
-}
-
-function calc_div_h_w_bottom_left(elem, event){
-  const {pageX: x, pageY: y} = event;
-
-  const {top: t0,
-         left: l0,
-         width: w0} = elem.style;
-
-  const t = Number.parseInt(t0);
-  const l = Number.parseInt(l0);
-  const w = Number.parseInt(w0);
-
-  const w2 = l + w - x;
-  const h2 = y - t;
-
-  return {h: h2, w: w2};
-}
-
-function resize_parent_bottom_right(elem, event){
-  const {parentDiv} = elem;
-  const {pageX: x, pageY: y} = event;
-  const {h, w} = calc_div_h_w_bottom_right(parentDiv, event);
-  const isTooSmall = is_too_small(h, w);
-
-  if(!isTooSmall){
-    parentDiv.style.height = h + 'px';
-    parentDiv.style.width = w + 'px';
-
-    parentDiv.urlData.h = h;
-    parentDiv.urlData.w = w;
-  }
-}
-
-function calc_div_h_w_bottom_right(elem, event){
-  const {pageX: x, pageY: y} = event;
-  const {top: t0, left: l0} = elem.style;
-
-  const t = Number.parseInt(t0);
-  const l = Number.parseInt(l0);
-
-  const w2 = x - l;
-  const h2 = y - t;
-
-  return {h: h2, w: w2};
+    elem.urlData.h = h;
+    elem.urlData.w = w;
+    elem.urlData.top = t;
+    elem.urlData.left = l;
 }
 
 function query_url_data(){
@@ -387,3 +297,4 @@ function query_url_data(){
   const nodes = Array.from(notArray);
   return nodes.map(({urlData}) => urlData);
 }
+
