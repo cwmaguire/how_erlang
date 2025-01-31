@@ -73,10 +73,12 @@ function create_main_div(urlData){
   const div = document.createElement("div");
   div.style.position = "fixed";
   div.style.border = "1px solid black";
+  div.style.borderRadius = "15px";
   div.style.top = top + 'px';
   div.style.left = left + 'px';
   div.style.width = w + 'px';
   div.style.height = h + 'px';
+  div.style.padding = '10px';
   div.innerHTML = `<a href='${url}'>${name}</a><br>${desc}`;
   div.className = 'url-div';
   div.urlData = urlData;
@@ -170,10 +172,18 @@ function center(elem, x, y){
 function create_resize_corner_divs(urlData, parentDiv){
   const {name, desc, url, top, left, w, h} = urlData;
 
-  const topleft = {x: left, y: top, is_top: true, is_left: true};
-  const topright = {x: left + w, y: top, is_top: true, is_left: false};
-  const bottomleft = {x: left, y: top + h, is_top: false, is_left: true};
-  const bottomright = {x: left + w, y: top + h, is_top: false, is_left: false};
+  const p = i(parentDiv.style.padding);
+  const rad = i(parentDiv.style.borderRadius);
+
+  const l = left + rad/3;
+  const r = left + w + p + p - rad/3;
+  const t = top + rad/3;
+  const b = top + h + p + p - rad/3;
+
+  const topleft = {x: l, y: t, is_top: true, is_left: true};
+  const topright = {x: r, y: t, is_top: true, is_left: false};
+  const bottomleft = {x: l, y: b, is_top: false, is_left: true};
+  const bottomright = {x: r, y: b, is_top: false, is_left: false};
 
   parentDiv.topLeft = create_resize_corner_div(topleft, parentDiv);
   parentDiv.topRight = create_resize_corner_div(topright, parentDiv);
@@ -183,7 +193,7 @@ function create_resize_corner_divs(urlData, parentDiv){
 
 function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
 
-  const halfSize = 25;
+  const halfSize = 10;
   const top = y - halfSize;
   const left = x - halfSize;
 
@@ -191,7 +201,7 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
 
   const div = document.createElement("div");
   div.style.position = "fixed";
-  div.style.border = "1px dashed red";
+  //div.style.border = "1px dashed red";
   div.style.top = top + 'px';
   div.style.left = left + 'px';
   div.style.width = (halfSize * 2) + 'px';
