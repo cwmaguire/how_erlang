@@ -57,6 +57,11 @@ function copy_url(urlData){
   post_url_data();
 }
 
+function delete_url(elem){
+  elem.remove();
+  post_url_data();
+}
+
 function create_url(urlData){
   render_url(urlData);
 }
@@ -106,6 +111,17 @@ function create_main_div(urlData){
   copyButton.onmousedown = stop_propagation;
   copyButton.onmousemove = stop_propagation;
   div.appendChild(copyButton);
+
+  const deleteButton = document.createElement("button");
+  deleteButton.textContent = 'delete';
+  deleteButton.onclick =
+    (event) => {
+      event.stopPropagation();
+      delete_url(div);
+    };
+  deleteButton.onmousedown = stop_propagation;
+  deleteButton.onmousemove = stop_propagation;
+  div.appendChild(deleteButton);
 
   return div;
 }
