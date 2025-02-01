@@ -105,8 +105,9 @@ function create_main_div(urlData){
 }
 
 function render_content(elem){
-  const {urlData: {name, desc, url}} = elem;
-  elem.innerHTML = `<a href='${url}'>${name}</a><br>${desc}`;
+  const {urlData} = elem;
+  const {name, desc, url} = urlData;
+  elem.innerHTML = `<a href='${url}'>${name}</a><br>${desc}<br>`;
 
   const copyButton = document.createElement("button");
   copyButton.textContent = 'copy';
@@ -360,7 +361,6 @@ function query_url_data(){
 
 function edit_url(event){
   event.stopPropagation();
-  console.log('Double Click!');
   const elem = event.target;
   const {desc, url, name} = elem.urlData;
 
@@ -441,7 +441,7 @@ function save(event, elem){
   elem.urlData.url = newUrl;
   elem.urlData.desc = newDesc;
 
-  elem.innerHTML = `<a href='${newUrl}'>${newName}</a><br>${newDesc}`;
+  render_content(elem);
   post_url_data();
 }
 
