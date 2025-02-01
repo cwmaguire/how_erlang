@@ -70,6 +70,7 @@ function render_url(urlData){
   const {name, desc, url, top, left, w, h} = urlData;
 
   const mainDiv = create_main_div(urlData);
+  render_content(mainDiv);
   create_resize_corner_divs(mainDiv);
 
   return mainDiv;
@@ -86,7 +87,6 @@ function create_main_div(urlData){
   div.style.width = w + 'px';
   div.style.height = h + 'px';
   div.style.padding = '10px';
-  div.innerHTML = `<a href='${url}'>${name}</a><br>${desc}`;
   div.className = 'url-div';
   div.urlData = urlData;
 
@@ -101,6 +101,13 @@ function create_main_div(urlData){
   div.onmousedown = () => follow_mouse(div);
   div.ondblclick = edit_url;
 
+  return div;
+}
+
+function render_content(elem){
+  const {urlData: {name, desc, url}} = elem;
+  elem.innerHTML = `<a href='${url}'>${name}</a><br>${desc}`;
+
   const copyButton = document.createElement("button");
   copyButton.textContent = 'copy';
   copyButton.onclick =
@@ -110,20 +117,18 @@ function create_main_div(urlData){
     };
   copyButton.onmousedown = stop_propagation;
   copyButton.onmousemove = stop_propagation;
-  div.appendChild(copyButton);
+  elem.appendChild(copyButton);
 
   const deleteButton = document.createElement("button");
   deleteButton.textContent = 'delete';
   deleteButton.onclick =
     (event) => {
       event.stopPropagation();
-      delete_url(div);
+      delete_url(elem);
     };
   deleteButton.onmousedown = stop_propagation;
   deleteButton.onmousemove = stop_propagation;
-  div.appendChild(deleteButton);
-
-  return div;
+  elem.appendChild(deleteButton);
 }
 
 function float_above_everything(elem){
@@ -441,10 +446,8 @@ function save(event, elem){
 }
 
 function cancel(event, elem){
-  const {urlData: {name, desc, url}} = elem;
   event.stopPropagation();
-  //const {urlData: {name, desc, url}} = event.target;
-  elem.innerHTML = `<a href='${url}'>${name}</a><br>${desc}`;
+  render_content(elem);
 }
 
 function stop_propagation(event){
