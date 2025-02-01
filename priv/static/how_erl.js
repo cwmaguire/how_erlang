@@ -93,12 +93,11 @@ function create_main_div(urlData){
   div.upHandlers = [function() {
                       div.style.zIndex = 0;
                     }];
-
   div.moveHandlers = [move_to, move_resizers, update_to];
 
   document.body.appendChild(div);
 
-  div.onmousedown = () => follow_mouse(div);
+  div.onmousedown = ({pageX: x, pageY: y}) => follow_mouse(div, {x, y});
   div.ondblclick = edit_url;
 
   return div;
@@ -111,6 +110,7 @@ function render_content(elem){
 
   const copyButton = document.createElement("button");
   copyButton.textContent = 'copy';
+  copyButton.style.margin = '5px';
   copyButton.onclick =
     (event) => {
       event.stopPropagation();
@@ -122,6 +122,7 @@ function render_content(elem){
 
   const deleteButton = document.createElement("button");
   deleteButton.textContent = 'delete';
+  deleteButton.style.margin = '5px';
   deleteButton.onclick =
     (event) => {
       event.stopPropagation();
@@ -136,11 +137,9 @@ function float_above_everything(elem){
   elem.style.zIndex = 1000;
 }
 
-function snap_to_mouse(elem, x, y){
-  move_to(elem, x, y);
-}
-
-function follow_mouse(elem){
+function follow_mouse(elem, {x, y}){
+  const {xd, yd} = mouse_delta(elem, x, y);
+  elem.mouseDelta = {xd, yd};
   float_above_everything(elem);
   const moveHandlers = elem.moveHandlers;
   const upHandlers = elem.upHandlers.slice();
@@ -161,11 +160,11 @@ function stop_following_mouse(){
     document.onmouseup = null;
 }
 
-function move_to(elem, event) {
-  const {pageX: x, pageY: y} = event;
-  const {xCenter, yCenter} = center(elem, x, y);
-  elem.style.left = xCenter + 'px';
-  elem.style.top = yCenter + 'px';
+function move_to(elem, {x, y}) {
+  const {xd, yd} = elem.mouseDelta;
+  console.log(`move_to x: ${x}, y: ${y}, xd: ${xd}, yd: ${yd}`);
+  elem.style.left = x + xd + 'px';
+  elem.style.top = y + yd + 'px';
 }
 
 function move_resizers(elem){
@@ -192,6 +191,13 @@ function update_to(elem, {pageX: x, pageY: y}){
   const {xCenter, yCenter} = center(elem, x, y);
   elem.urlData.left = xCenter;
   elem.urlData.top = yCenter;
+}
+
+function mouse_delta({style: {top, left}}, x, y){
+  const xd = i(left) - x;
+  const yd = i(top) - y;
+  console.log(`mouse_delta: top ${top} left ${left} x ${x} y ${y} xd ${xd} yd ${yd}`);
+  return {xd, yd};
 }
 
 function center(elem, x, y){
@@ -241,7 +247,7 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
 
   const div = document.createElement("div");
   div.style.position = "fixed";
-  //div.style.border = "1px dashed red";
+  div.style.border = "1px dotted red";
   div.style.top = top + 'px';
   div.style.left = left + 'px';
   div.style.width = (halfSize * 2) + 'px';
@@ -254,6 +260,7 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
   div.is_left = is_left;
   div.moveHandlers = [resize_parent];
   div.upHandlers = [];
+  div.mouseDelta = {xd: 0, yd: 0};
 
   document.body.appendChild(div);
 
