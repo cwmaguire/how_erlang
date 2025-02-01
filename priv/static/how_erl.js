@@ -20,7 +20,6 @@ async function getData() {
 
 function post_url_data() {
   const urlData = query_url_data();
-  console.log(urlData);
   const url = "http://main:8080/video_urls";
   fetch(url, {
     method: "POST",
@@ -29,13 +28,9 @@ function post_url_data() {
   });
 }
 
-console.log("Getting JSON");
-
 getData();
 
 function create_urls(json){
-  console.log(json);
-
   json.forEach(create_url);
 }
 
@@ -54,8 +49,6 @@ function create_new_url({pageX: x, pageY: y}){
 }
 
 function create_url(urlData){
-  console.log("creating url");
-  console.log(urlData);
   render_url(urlData);
 }
 
@@ -63,7 +56,7 @@ function render_url(urlData){
   const {name, desc, url, top, left, w, h} = urlData;
 
   const mainDiv = create_main_div(urlData);
-  create_resize_corner_divs(urlData, mainDiv);
+  create_resize_corner_divs(mainDiv);
 
   return mainDiv;
 }
@@ -125,34 +118,31 @@ function stop_following_mouse(){
     document.onmouseup = null;
 }
 
-function move_to(elem, {pageX: x, pageY: y}) {
+function move_to(elem, event) {
+  const {pageX: x, pageY: y} = event;
   const {xCenter, yCenter} = center(elem, x, y);
   elem.style.left = xCenter + 'px';
   elem.style.top = yCenter + 'px';
 }
 
-function move_resizers(elem, event){
-  const {top, left, width, height} = elem.style;
+function move_resizers(elem){
+  const tlResizer = elem.topLeft;
+  const trResizer = elem.topRight;
+  const blResizer = elem.bottomLeft;
+  const brResizer = elem.bottomRight;
 
-  const t = Number.parseInt(top);
-  const l = Number.parseInt(left);
-  const w = Number.parseInt(width);
-  const h = Number.parseInt(height);
+  const cps = corner_points(elem);
 
-  const topLeft = {pageX: l, pageY: t};
-  const topRight = {pageX: l + w, pageY: t};
-  const bottomLeft = {pageX: l, pageY: t + h};
-  const bottomRight = {pageX: l + w, pageY: t + h};
+  move_to(tlResizer, add_mouse_event_fields(cps.tl));
+  move_to(trResizer, add_mouse_event_fields(cps.tr));
+  move_to(blResizer, add_mouse_event_fields(cps.bl));
+  move_to(brResizer, add_mouse_event_fields(cps.br));
+}
 
-  const topLeftResizer = elem.topLeft;
-  const topRightResizer = elem.topRight;
-  const bottomLeftResizer = elem.bottomLeft;
-  const bottomRightResizer = elem.bottomRight;
-
-  move_to(topLeftResizer, topLeft);
-  move_to(topRightResizer, topRight);
-  move_to(bottomLeftResizer, bottomLeft);
-  move_to(bottomRightResizer, bottomRight);
+function add_mouse_event_fields(CornerPoint){
+  CornerPoint.pageX = CornerPoint.x;
+  CornerPoint.pageY = CornerPoint.y;
+  return CornerPoint;
 }
 
 function update_to(elem, {pageX: x, pageY: y}){
@@ -162,33 +152,40 @@ function update_to(elem, {pageX: x, pageY: y}){
 }
 
 function center(elem, x, y){
-  const halfWidth = elem.offsetWidth / 2;
-  const halfHeight = elem.offsetHeight / 2;
+  const halfWidth = Math.round(elem.offsetWidth / 2);
+  const halfHeight = Math.round(elem.offsetHeight / 2);
   const xCenter = (x - halfWidth);
   const yCenter = (y - halfHeight);
   return {xCenter: xCenter, yCenter: yCenter};
 }
 
-function create_resize_corner_divs(urlData, parentDiv){
-  const {name, desc, url, top, left, w, h} = urlData;
+function create_resize_corner_divs(elem){
+  const cps = corner_points(elem);
+  elem.topLeft = create_resize_corner_div(cps.tl, elem);
+  elem.topRight = create_resize_corner_div(cps.tr, elem);
+  elem.bottomLeft = create_resize_corner_div(cps.bl, elem);
+  elem.bottomRight = create_resize_corner_div(cps.br, elem);
+}
 
-  const p = i(parentDiv.style.padding);
-  const rad = i(parentDiv.style.borderRadius);
+function corner_points({offsetWidth: w,
+                        offsetHeight: h,
+                        style: s}){
+  const top = i(s.top);
+  const left = i(s.left);
+  const p = i(s.padding);
+  const rad = i(s.borderRadius);
 
   const l = left + rad/3;
-  const r = left + w + p + p - rad/3;
+  const r = left + w - rad/3;
   const t = top + rad/3;
-  const b = top + h + p + p - rad/3;
+  const b = top + h - rad/3;
 
-  const topleft = {x: l, y: t, is_top: true, is_left: true};
-  const topright = {x: r, y: t, is_top: true, is_left: false};
-  const bottomleft = {x: l, y: b, is_top: false, is_left: true};
-  const bottomright = {x: r, y: b, is_top: false, is_left: false};
+  const tl = {x: l, y: t, is_top: true, is_left: true};
+  const tr = {x: r, y: t, is_top: true, is_left: false};
+  const bl = {x: l, y: b, is_top: false, is_left: true};
+  const br = {x: r, y: b, is_top: false, is_left: false};
 
-  parentDiv.topLeft = create_resize_corner_div(topleft, parentDiv);
-  parentDiv.topRight = create_resize_corner_div(topright, parentDiv);
-  parentDiv.bottomLeft = create_resize_corner_div(bottomleft, parentDiv);
-  parentDiv.bottomRight = create_resize_corner_div(bottomright, parentDiv);
+  return {tl: tl, tr: tr, bl: bl, br: br};
 }
 
 function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
@@ -201,7 +198,7 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
 
   const div = document.createElement("div");
   div.style.position = "fixed";
-  //div.style.border = "1px dashed red";
+  div.style.border = "1px dashed red";
   div.style.top = top + 'px';
   div.style.left = left + 'px';
   div.style.width = (halfSize * 2) + 'px';
@@ -249,11 +246,14 @@ function resize_parent(elem, event){
 
 function resize_parent_({parentDiv}, event, dimsFun){
   const {pageX: x, pageY: y} = event;
-  const newDims = dimsFun(dimensions(parentDiv), {x: x, y: y});
+  const currDims = dimensions(parentDiv);
+  const newDims = dimsFun(currDims, {x: x, y: y});
+  const clampedDims = clamp_dims(newDims, currDims);
+  update(parentDiv, clampedDims);
+}
 
-  if(!is_too_small(newDims)){
-    update(parentDiv, newDims);
-  }
+function dimensions({style: {top: t, left: l, width: w, height: h}}){
+  return {t: i(t), l: i(l), w: i(w), h: i(h)};
 }
 
 function calc_div_h_w_top_left({t, l, w, h}, {x, y}){
@@ -280,8 +280,18 @@ function is_too_small({h, w}){
   return h < MIN_URL_SIZE || w < MIN_URL_SIZE;
 }
 
-function dimensions({style: {top: t, left: l, width: w, height: h}}){
-  return {t: i(t), l: i(l), w: i(w), h: i(h)};
+function clamp_dims({t: t2, l: l2, h: h2, w: w2},
+                    {t: t1, l: l1, h: h1, w: w1}){
+  const clamped = {t: t2, l: l2, h: h2, w: w2};
+  if(w2 < MIN_URL_SIZE){
+    clamped.w = w1;
+    clamped.l = l1;
+  }
+  if(h2 < MIN_URL_SIZE){
+    clamped.h = h1;
+    clamped.t = t1;
+  }
+  return clamped;
 }
 
 function i(s){
