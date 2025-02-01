@@ -1,5 +1,5 @@
 var urls;
-const MIN_URL_SIZE = 100;
+const MIN_URL_SIZE = 70;
 
 document.ondblclick = create_new_url;
 
@@ -49,6 +49,14 @@ function create_new_url({pageX: x, pageY: y}){
   post_url_data();
 }
 
+function copy_url(urlData){
+  const Y_BUFFER = 20;
+  const newUrlData = structuredClone(urlData);
+  newUrlData.left = newUrlData.left + newUrlData.w + Y_BUFFER;
+  render_url(newUrlData);
+  post_url_data();
+}
+
 function create_url(urlData){
   render_url(urlData);
 }
@@ -87,6 +95,17 @@ function create_main_div(urlData){
 
   div.onmousedown = () => follow_mouse(div);
   div.ondblclick = edit_url;
+
+  const copyButton = document.createElement("button");
+  copyButton.textContent = 'copy';
+  copyButton.onclick =
+    (event) => {
+      event.stopPropagation();
+      copy_url(urlData);
+    };
+  copyButton.onmousedown = stop_propagation;
+  copyButton.onmousemove = stop_propagation;
+  div.appendChild(copyButton);
 
   return div;
 }
@@ -200,7 +219,7 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
 
   const div = document.createElement("div");
   div.style.position = "fixed";
-  div.style.border = "1px dashed red";
+  //div.style.border = "1px dashed red";
   div.style.top = top + 'px';
   div.style.left = left + 'px';
   div.style.width = (halfSize * 2) + 'px';
