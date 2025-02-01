@@ -33,8 +33,8 @@ to_json(Req, State) ->
     {ok, JSON} = file:read_file(Filename),
     {JSON, Req, State}.
 
+% TODO prevent race conditions between read and write
 from_json(Req0, State) ->
-    io:format("something"),
     {ok, JSON, Req1} = cowboy_req:read_body(Req0),
     Priv = code:priv_dir(how_erlang),
     Filename = Priv ++ "/urls.json",

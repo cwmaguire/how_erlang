@@ -20,6 +20,7 @@ async function getData() {
 
 function post_url_data() {
   const urlData = query_url_data();
+  console.log(`Writing data: ${urlData}`);
   const url = "http://main:8080/video_urls";
   fetch(url, {
     method: "POST",
@@ -85,6 +86,7 @@ function create_main_div(urlData){
   document.body.appendChild(div);
 
   div.onmousedown = () => follow_mouse(div);
+  div.ondblclick = edit_url;
 
   return div;
 }
@@ -316,3 +318,99 @@ function query_url_data(){
   return nodes.map(({urlData}) => urlData);
 }
 
+function edit_url(event){
+  event.stopPropagation();
+  console.log('Double Click!');
+  const elem = event.target;
+  const {desc, url, name} = elem.urlData;
+
+  const nameInput = document.createElement('input');
+  nameInput.id = 'nameInput';
+  nameInput.type = 'text';
+  nameInput.size = '20';
+  nameInput.value = name;
+  nameInput.onmousedown = (event) => event.stopPropagation();
+
+  const nameLabel = document.createElement('label');
+  nameLabel.htmlFor = 'nameInput';
+  nameLabel.innerText = 'Name: ';
+
+  const descInput = document.createElement('input');
+  descInput.id = 'descInput';
+  descInput.type = 'text';
+  descInput.size = '20';
+  descInput.value = desc;
+  descInput.onmousedown = (event) => event.stopPropagation();
+
+  const descLabel = document.createElement('label');
+  descLabel.htmlFor = 'descInput';
+  descLabel.innerText = 'Description: ';
+
+  const urlInput = document.createElement('input');
+  urlInput.id = 'urlInput';
+  urlInput.type = 'text';
+  urlInput.size = '20';
+  urlInput.value = url;
+  urlInput.onmousedown = stop_propagation;
+
+  const urlLabel = document.createElement('label');
+  urlLabel.htmlFor = 'urlInput';
+  urlLabel.innerText = 'URL: ';
+
+  const saveButton = document.createElement('button');
+  saveButton.urlInput = urlInput;
+  saveButton.nameInput = nameInput;
+  saveButton.descInput = descInput;
+  saveButton.textContent = 'save';
+  saveButton.onclick = (event) => save(event, elem);
+  saveButton.onmousedown = stop_propagation;
+  saveButton.onmousemove = stop_propagation;
+
+  const cancelButton = document.createElement('button');
+  cancelButton.textContent = 'cancel';
+  cancelButton.onclick = cancel;
+  cancelButton.onmousedown = stop_propagation;
+  cancelButton.onmousemove = stop_propagation;
+
+  //elem.innerHTML = '';
+  elem.replaceChildren();
+  elem.appendChild(nameLabel);
+  elem.appendChild(nameInput);
+  elem.appendChild(document.createElement('br'));
+  elem.appendChild(descLabel);
+  elem.appendChild(descInput);
+  elem.appendChild(document.createElement('br'));
+  elem.appendChild(urlLabel);
+  elem.appendChild(urlInput);
+  elem.appendChild(document.createElement('br'));
+  elem.appendChild(saveButton);
+  elem.appendChild(cancelButton);
+  window.getSelection().removeAllRanges();
+}
+
+function save(event, elem){
+  event.stopPropagation();
+  const {desc, url, name} = elem.urlData;
+  const saveButton = event.target;
+
+  const newName = saveButton.nameInput.value;
+  const newDesc = saveButton.descInput.value;
+  const newUrl = saveButton.urlInput.value;
+
+  elem.urlData.name = newName;
+  elem.urlData.url = newUrl;
+  elem.urlData.desc = newDesc;
+
+  elem.innerHTML = `<a href='${newUrl}'>${newName}</a><br>${newDesc}`;
+  post_url_data();
+  console.log('save');
+}
+
+function cancel(event){
+  event.stopPropagation();
+  console.log('cancel');
+}
+
+function stop_propagation(event){
+  event.stopPropagation();
+}
