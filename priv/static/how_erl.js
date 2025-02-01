@@ -403,7 +403,7 @@ function edit_url(event){
 
   const cancelButton = document.createElement('button');
   cancelButton.textContent = 'cancel';
-  cancelButton.onclick = cancel;
+  cancelButton.onclick = (event) => cancel(event, elem);
   cancelButton.onmousedown = stop_propagation;
   cancelButton.onmousemove = stop_propagation;
 
@@ -438,12 +438,13 @@ function save(event, elem){
 
   elem.innerHTML = `<a href='${newUrl}'>${newName}</a><br>${newDesc}`;
   post_url_data();
-  console.log('save');
 }
 
-function cancel(event){
+function cancel(event, elem){
+  const {urlData: {name, desc, url}} = elem;
   event.stopPropagation();
-  console.log('cancel');
+  //const {urlData: {name, desc, url}} = event.target;
+  elem.innerHTML = `<a href='${url}'>${name}</a><br>${desc}`;
 }
 
 function stop_propagation(event){
