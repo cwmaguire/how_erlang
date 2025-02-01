@@ -27,7 +27,6 @@ content_types_accepted(Req, State) ->
     {ContentTypesAccepted, Req, State}.
 
 to_json(Req, State) ->
-    io:format("to_json"),
     Priv = code:priv_dir(how_erlang),
     Filename = Priv ++ "/urls.json",
     {ok, JSON} = file:read_file(Filename),

@@ -162,7 +162,7 @@ function stop_following_mouse(){
 
 function move_to(elem, {x, y}) {
   const {xd, yd} = elem.mouseDelta;
-  console.log(`move_to x: ${x}, y: ${y}, xd: ${xd}, yd: ${yd}`);
+  //console.log(`move_to x: ${x}, y: ${y}, xd: ${xd}, yd: ${yd}`);
   elem.style.left = x + xd + 'px';
   elem.style.top = y + yd + 'px';
 }
@@ -175,28 +175,21 @@ function move_resizers(elem){
 
   const cps = corner_points(elem);
 
-  move_to(tlResizer, add_mouse_event_fields(cps.tl));
-  move_to(trResizer, add_mouse_event_fields(cps.tr));
-  move_to(blResizer, add_mouse_event_fields(cps.bl));
-  move_to(brResizer, add_mouse_event_fields(cps.br));
+  move_to(tlResizer, cps.tl);
+  move_to(trResizer, cps.tr);
+  move_to(blResizer, cps.bl);
+  move_to(brResizer, cps.br);
 }
 
-function add_mouse_event_fields(CornerPoint){
-  CornerPoint.pageX = CornerPoint.x;
-  CornerPoint.pageY = CornerPoint.y;
-  return CornerPoint;
-}
-
-function update_to(elem, {pageX: x, pageY: y}){
-  const {xCenter, yCenter} = center(elem, x, y);
-  elem.urlData.left = xCenter;
-  elem.urlData.top = yCenter;
+function update_to(elem){
+  elem.urlData.left = i(elem.style.left);
+  elem.urlData.top = i(elem.style.top);
 }
 
 function mouse_delta({style: {top, left}}, x, y){
   const xd = i(left) - x;
   const yd = i(top) - y;
-  console.log(`mouse_delta: top ${top} left ${left} x ${x} y ${y} xd ${xd} yd ${yd}`);
+  //console.log(`mouse_delta: top ${top} left ${left} x ${x} y ${y} xd ${xd} yd ${yd}`);
   return {xd, yd};
 }
 
@@ -221,7 +214,6 @@ function corner_points({offsetWidth: w,
                         style: s}){
   const top = i(s.top);
   const left = i(s.left);
-  const p = i(s.padding);
   const rad = i(s.borderRadius);
 
   const l = left + rad/3;
@@ -260,11 +252,11 @@ function create_resize_corner_div({x, y, is_top, is_left}, parentDiv){
   div.is_left = is_left;
   div.moveHandlers = [resize_parent];
   div.upHandlers = [];
-  div.mouseDelta = {xd: 0, yd: 0};
+  div.mouseDelta = {xd: -10, yd: -10};
 
   document.body.appendChild(div);
 
-  div.onmousedown = () => follow_mouse(div);
+  div.onmousedown = ({pageX: x, pageY: y}) => follow_mouse(div, {x, y});
 
   return div;
 }
