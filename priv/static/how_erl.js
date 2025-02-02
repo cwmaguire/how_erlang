@@ -1,10 +1,12 @@
+"use strict";
+
 const RESIZE_CORNER_SIZE = 20;
 const MIN_URL_SIZE = 70;
 
 document.ondblclick = create_new_url;
 
-async function getData() {
-  const url = "http://main:8080/video_urls";
+(async function() {
+  const url = "http://localhost:8080/video_urls";
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -16,9 +18,7 @@ async function getData() {
   } catch (error) {
     console.error(error.message);
   }
-}
-
-getData();
+})();
 
 function create_new_url({pageX: x, pageY: y}){
   const urlData = {
@@ -226,7 +226,6 @@ function get_cursor(is_top, is_left){
 
 function resize_parent(elem, event){
   const {parentDiv, is_top, is_left} = elem;
-  const {pageX: x, pageY: y} = event;
 
   if(is_top && is_left){
     resize_parent_(elem, event, calc_div_h_w_top_left);
@@ -359,12 +358,12 @@ function add_textbox(elem, id, value, labelText){
 
 function save(event, elem){
   event.stopPropagation();
-  const {desc, url, name} = elem.urlData;
+  const {urlData} = elem;
   const saveButton = event.target;
 
-  elem.urlData.name = saveButton.nameInput.value;
-  elem.urlData.desc = saveButton.descInput.value;
-  elem.urlData.url = saveButton.urlInput.value;
+  urlData.name = saveButton.nameInput.value;
+  urlData.desc = saveButton.descInput.value;
+  urlData.url = saveButton.urlInput.value;
 
   render_content(elem);
   post_url_data();
@@ -382,7 +381,7 @@ function stop_propagation(event){
 function post_url_data() {
   const urlData = query_url_data();
   console.log(`Writing data: ${urlData}`);
-  const url = "http://main:8080/video_urls";
+  const url = "http://localhost:8080/video_urls";
   fetch(url, {
     method: "POST",
     body: JSON.stringify(urlData),
