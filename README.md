@@ -14,6 +14,16 @@ layout links spatially using drag and drop.
 - Mouse over the corners of boxes to reveal drag handles
 - Click and drag the drag handles to resize a box
 
+## Build
+
+Install `erlang` and `rebar3`. Then, run:
+
+- `rebar3 get-deps`
+- `rebar3 compile`
+- `rebar3 shell`
+
+You can then navigate to `http://localhost:8080` in your browser to see the app.
+
 ## Details
 - Cowboy web server in Erlang running in JSON provides and accepts a JSON file with URL details: name, desc, coordinates, etc.
 - Web page fetches URLs from server and saves them back.
